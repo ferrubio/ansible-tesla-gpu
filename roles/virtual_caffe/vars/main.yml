@@ -1,0 +1,6 @@
+---
+# vars file for caffe install
+caffe_file_name: caffe-{{caffe_version}}.zip
+caffe_file_url: https://github.com/BVLC/caffe/archive/{{caffe_version}}.zip
+comp: /var/cache/{{caffe_file_name}}
+

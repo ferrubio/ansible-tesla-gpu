@@ -1,0 +1,68 @@
+---
+# tasks file for caffe install
+- name: Download default version
+  get_url:
+    dest: /var/cache/{{caffe_file_name}}
+    mode: 0755
+    owner: root
+    group: root
+    url: "{{caffe_file_url}}"
+
+- name: Install general dependencies
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - libprotobuf-dev 
+    - libleveldb-dev
+    - libsnappy-dev
+    - libhdf5-serial-dev
+    - protobuf-compiler
+
+- name: Install atlas
+  apt: name=libatlas-base-dev update_cache=yes
+
+- name: Check for opencv
+  stat: path=/usr/local/lib/libopencv_core.so
+  register: cv_check
+
+- name: Install opencv
+  apt: name=libopencv-dev update_cache=yes
+  when: not cv_check.stat.exists
+
+- name: Install boost
+  apt: name=libboost-all-dev install_recommends=no update_cache=yes
+
+- name: Install python
+  apt: name=python-dev update_cache=yes
+
+- name: Remaining dependencies
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - libgflags-dev
+    - libgoogle-glog-dev
+    - liblmdb-dev
+
+- name: extract caffe in opt
+  unarchive: src={{comp}} dest=/opt/
+
+- name: Creates directory for build
+  file: path=/opt/caffe-{{caffe_version}}/release state=directory
+
+- name: cmake for caffe
+  shell: cmake ..
+  args:
+    chdir: /opt/caffe-{{caffe_version}}/release
+
+- name: get cores for make
+  shell: nproc
+  register: num_cores
+
+- name: make for caffe
+  shell: make all -j{{num_cores.stdout}}
+  args:
+    chdir: /opt/caffe-{{caffe_version}}/release
+
+- name: make pycaffe
+  shell: make pycaffe
+  args:
+    chdir: /opt/caffe-{{caffe_version}}/release
+

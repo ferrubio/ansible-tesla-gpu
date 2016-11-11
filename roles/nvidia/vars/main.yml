@@ -1,0 +1,14 @@
+---
+# vars file for nvidia-install
+nvidia_file_name: NVIDIA-Linux-x86_64-{{nvidia_driver_version}}.run
+nvidia_driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{nvidia_driver_version}}/{{nvidia_file_name}}
+exe: /var/cache/{{nvidia_file_name}}
+
+# vars file for cuda-install
+cuda_file_name: cuda_{{cuda_file_version}}_linux.run
+cuda_file_url: https://developer.nvidia.com/compute/cuda/{{cuda_base_version}}/prod/local_installers/cuda_{{cuda_file_version}}_linux-run
+cuda_exe: /var/cache/{{cuda_file_name}}
+
+# vars file for cudnn-install
+cudnn_file: cudnn-8.0-linux-x64-v5.1.tgz
+cudnn_tar: /var/cache/{{cudnn_file}}

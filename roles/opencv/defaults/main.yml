@@ -1,0 +1,3 @@
+---
+# defaults file for nvidia_install
+opencv_version: 'master'

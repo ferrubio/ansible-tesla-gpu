@@ -1,0 +1,67 @@
+---
+# tasks file for opencv install
+- name: Download default version
+  get_url:
+    dest: /var/cache/{{opencv_file_name}}
+    mode: 0755
+    owner: root
+    group: root
+    url: "{{opencv_stable_url}}"
+
+- name: Install compiler
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - build-essential
+
+- name: Install required
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - cmake
+    - git
+    - libgtk2.0-dev
+    - pkg-config
+    - libavcodec-dev
+    - libavformat-dev
+    - libswscale-dev
+    - unzip
+
+- name: Install optional
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - python-dev
+    - python-numpy
+    - python3-dev
+    - python3-numpy
+    - libtbb2
+    - libtbb-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libtiff-dev
+    - libjasper-dev
+    - libdc1394-22-dev
+
+
+- name: extract opencv in opt
+  unarchive: src={{comp}} dest=/opt/
+
+- name: Creates directory for build
+  file: path=/opt/opencv-{{opencv_version}}/release state=directory
+
+- name: cmake for opencv
+  shell: cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
+  args:
+    chdir: /opt/opencv-{{opencv_version}}/release
+
+- name: get cores for make
+  shell: nproc
+  register: num_cores
+
+- name: make for opencv
+  shell: make -j{{num_cores.stdout}}
+  args:
+    chdir: /opt/opencv-{{opencv_version}}/release
+
+- name: make install for opencv
+  shell: make install
+  args:
+    chdir: /opt/opencv-{{opencv_version}}/release

@@ -10,6 +10,7 @@
 
 # Ex 1: Ungrouped hosts, specify before any group headers.
 
+localhost	ansible_connection=local
 #green.example.com
 #blue.example.com
 #192.168.100.1

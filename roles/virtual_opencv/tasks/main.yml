@@ -1,0 +1,45 @@
+---
+# tasks file for opencv install
+
+- name: Creates directory for libraries
+  file: path={{library_path}} state=directory
+
+- name: get the username running the deploy
+  local_action: command whoami
+  register: username
+
+- name: Download default version
+  get_url:
+    dest: '{{library_path}}/{{opencv_file_name}}'
+    mode: 0755
+    owner: "{{username.stdout}}"
+    group: "{{username.stdout}}"
+    url: "{{opencv_stable_url}}"
+
+- name: extract opencv in opt
+  unarchive: src="{{comp}}" dest="{{library_path}}"
+
+- name: install numpy
+  shell: pip install numpy --upgrade
+
+- name: Creates directory for build
+  file: path='{{library_path}}/opencv-{{opencv_version}}/release' state=directory
+
+- name: cmake for opencv
+  shell: cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX={{venv_path}} ..
+  args:
+    chdir: '{{library_path}}/opencv-{{opencv_version}}/release'
+
+- name: get cores for make
+  shell: nproc
+  register: num_cores
+
+- name: make for opencv
+  shell: make -j{{num_cores.stdout}}
+  args:
+    chdir: '{{library_path}}/opencv-{{opencv_version}}/release'
+
+- name: make install for opencv
+  shell: make install
+  args:
+    chdir: '{{library_path}}/opencv-{{opencv_version}}/release'

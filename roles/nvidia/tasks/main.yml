@@ -1,0 +1,78 @@
+---
+# tasks file for nvidia-install
+- name: Download driver
+  get_url:
+    dest: /var/cache/{{nvidia_file_name}}
+    mode: 0755
+    owner: root
+    group: root
+    url: "{{nvidia_driver_url}}"
+
+- name: Install build dependencies
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - build-essential
+    - dkms
+
+- name: remove nouveau driver
+  shell: rmmod nouveau
+  register: nouveau_remove
+  changed_when: '{{nouveau_remove.rc != 0}}'
+  failed_when: '{{"in use" in nouveau_remove.stderr}}'
+
+- name: blacklist nouveau driver
+  copy: dest=/etc/modprobe.d/blacklist-nouveau.conf content='blacklist nouveau' force=yes
+  register: blacklist_changed
+
+- name: update initramfs
+  shell: update-initramfs -u
+  when: blacklist_changed|changed
+
+- name: Running NVIDIA installer
+  shell: "{{exe}} -a -z --no-x-check --dkms -c -s"
+  register: nvidia_log
+
+- name: modprobe modules
+  shell: modprobe nvidia nvidia_uvm
+
+# tasks for CUDA-install
+- name: Download CUDA
+  get_url:
+    dest: /var/cache/{{cuda_file_name}}
+    mode: 0755
+    owner: root
+    group: root
+    url: "{{cuda_file_url}}"
+
+- name: Install dependencies
+  apt: name={{item}} update_cache=yes
+  with_items:
+    - gcc
+    - g++
+    - gcc-4.9 
+    - g++-4.9
+    - libxi6
+    - libxi-dev
+    - libglu1-mesa
+    - libglu1-mesa-dev
+    - libxmu6
+    - libxmu-dev
+    - linux-headers-amd64
+    - linux-source
+
+- name: Running cuda installer
+  shell: "{{cuda_exe}} --silent --driver --toolkit --samples"
+  register: cuda_log
+
+- name: Create symlink for correct g++
+  file: src=/usr/bin/g++-4.9 dest=/usr/local/cuda/bin/g++ state=link
+
+- name: Create symlink for correct gcc
+  file: src=/usr/bin/gcc-4.9 dest=/usr/local/cuda/bin/gcc state=link
+ 
+# tasks for cudNN install
+# Unfortunatelly, this package needs a registration in NVIDIA page and it
+# cannot be download automatically
+- name: extract cudnn from file
+  unarchive: src={{cudnn_tar}} dest=/usr/local/
+ 

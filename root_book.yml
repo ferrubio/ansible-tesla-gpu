@@ -1,0 +1,9 @@
+---
+# This playbook install nvidia drivers
+
+- hosts: all
+
+  roles:
+    - nvidia
+    - opencv
+    - caffe
