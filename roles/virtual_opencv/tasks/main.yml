@@ -16,8 +16,19 @@
     group: "{{username.stdout}}"
     url: "{{opencv_stable_url}}"
 
-- name: extract opencv in opt
-  unarchive: src="{{comp}}" dest="{{library_path}}"
+- name: extract opencv in library_path
+  unarchive: src="{{library_path}}/{{opencv_file_name}}" dest="{{library_path}}"
+
+- name: Download contrib version
+  get_url:
+    dest: '{{library_path}}/{{opencv_contrib_file_name}}'
+    mode: 0755
+    owner: "{{username.stdout}}"
+    group: "{{username.stdout}}"
+    url: "{{opencv_contrib_stable_url}}"
+
+- name: extract opencv_contrib in library_path
+  shell: unzip -qo {{library_path}}/{{opencv_contrib_file_name}} -d {{library_path}}
 
 - name: install numpy
   shell: pip install numpy --upgrade
@@ -26,7 +37,7 @@
   file: path='{{library_path}}/opencv-{{opencv_version}}/release' state=directory
 
 - name: cmake for opencv
-  shell: cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX={{venv_path}} ..
+  shell: cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX={{venv_path}} -D OPENCV_EXTRA_MODULES_PATH={{library_path}}/opencv_contrib-{{opencv_version}}/modules ..
   args:
     chdir: '{{library_path}}/opencv-{{opencv_version}}/release'
 

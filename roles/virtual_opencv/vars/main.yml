@@ -2,5 +2,6 @@
 # vars file for opencv install
 opencv_file_name: opencv-{{opencv_version}}.zip
 opencv_stable_url: https://github.com/opencv/opencv/archive/{{opencv_version}}.zip
-comp: /var/cache/{{opencv_file_name}}
 
+opencv_contrib_file_name: opencv_contrib-{{opencv_version}}.zip
+opencv_contrib_stable_url: https://github.com/opencv/opencv_contrib/archive/{{opencv_version}}.zip
