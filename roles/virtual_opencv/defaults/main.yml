@@ -1,5 +1,0 @@
----
-# defaults file for virtual opencv
-opencv_version: 'master'
-library_path: '/home/frubio/imgpy_project'
-venv_path: '/home/frubio/imgpy'

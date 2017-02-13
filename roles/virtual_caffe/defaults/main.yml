@@ -1,4 +1,0 @@
----
-# defaults file for virtual caffe
-caffe_version: 'master'
-library_path: '/home/frubio/imgpy_project'
