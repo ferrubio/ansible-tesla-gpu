@@ -1,12 +1,10 @@
 ---
 # tasks file for caffe install
-- name: Download default version
-  get_url:
-    dest: /var/cache/{{caffe_file_name}}
-    mode: 0755
-    owner: root
-    group: root
-    url: "{{caffe_file_url}}"
+- name: caffe git clone with specific checkout
+  git:
+    repo: https://github.com/BVLC/caffe.git
+    dest: /opt/caffe
+    version: "{{caffe_version}}"
 
 - name: Install general dependencies
   apt: name={{item}} update_cache=yes
@@ -41,16 +39,29 @@
     - libgoogle-glog-dev
     - liblmdb-dev
 
-- name: extract caffe in opt
-  unarchive: src={{comp}} dest=/opt/
+- name: python requeriments
+  shell: for req in $(cat /opt/caffe/python/requirements.txt); do pip3 install $req; done
 
-- name: Creates directory for build
-  file: path=/opt/caffe-{{caffe_version}}/release state=directory
+- name: python upgrade dateutils
+  shell: pip3 install python-dateutil --upgrade
 
-- name: cmake for caffe
-  shell: cmake ..
-  args:
-    chdir: /opt/caffe-{{caffe_version}}/release
+- name: symlinks for caffe in python3
+  file:
+    src: '/usr/lib/x86_64-linux-gnu/{{ item.src }}'
+    dest: '/usr/lib/x86_64-linux-gnu/{{ item.dest }}'
+    state: link
+  with_items:
+    - { src: 'libboost_python-py34.so', dest: 'libboost_python3.so' }
+    - { src: 'libhdf5_serial.so.8.0.2', dest: 'libhdf5.so' }
+    - { src: 'libhdf5_serial_hl.so.8.0.2', dest: 'libhdf5_hl.so' }
+
+- name: copy Makefile.config with the new configuration to caffe folder
+  copy:
+    src: /etc/ansible/extra-config/caffe/Makefile.config
+    dest: /opt/caffe
+    owner: root
+    group: root
+    mode: 0755
 
 - name: get cores for make
   shell: nproc
@@ -59,10 +70,9 @@
 - name: make for caffe
   shell: make all -j{{num_cores.stdout}}
   args:
-    chdir: /opt/caffe-{{caffe_version}}/release
+    chdir: /opt/caffe
 
 - name: make pycaffe
   shell: make pycaffe
   args:
-    chdir: /opt/caffe-{{caffe_version}}/release
-
+    chdir: /opt/caffe
