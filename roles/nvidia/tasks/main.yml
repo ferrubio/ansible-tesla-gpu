@@ -76,3 +76,11 @@
 - name: extract cudnn from file
   unarchive: src={{cudnn_tar}} dest=/usr/local/
  
+# problems with cuda are solved adding its lib path to ld.so.conf
+- name: Edit ld.so.conf, added path to cuda
+  lineinfile:
+    path: /etc/ld.so.conf.d/libc.conf
+    line: '/usr/local/cuda/lib64'
+
+- name: Apply changes in ld.so.conf
+  shell: ldconfig
