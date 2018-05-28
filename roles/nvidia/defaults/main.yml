@@ -1,7 +1,7 @@
 ---
 # defaults file for nvidia_install
-nvidia_driver_version: '367.55'
+nvidia_driver_version: '384.125'
 
 # defaults file for cuda-install
-cuda_base_version: '8.0'
-cuda_file_version: '{{cuda_base_version}}.44'
+cuda_base_version: '9.0'
+cuda_file_version: '{{cuda_base_version}}.176_384.81'
